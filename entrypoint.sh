@@ -2,15 +2,12 @@
 
 # the first argument provided is a comma-separated list of all ZooKeeper servers in the ensemble:
 export ZOOKEEPER_SERVERS=$1
-# the second argument provided is vat of this ZooKeeper node:
-export ZOOKEEPER_ID=$2
+export SERVER_ID=0
+export SERVER_IP=$(hostname -i)
 
 # create data and blog directories:
 mkdir -p $dataDir
 mkdir -p $dataLogDir
-
-# create myID file:
-echo "$ZOOKEEPER_ID" | tee $dataDir/myid
 
 # now build the ZooKeeper configuration file:
 ZOOKEEPER_CONFIG=
@@ -28,13 +25,18 @@ for index in "${!ZOOKEEPER_SERVERS_ARRAY[@]}"
 do
     ZKID=$(($index+1))
     ZKIP=${ZOOKEEPER_SERVERS_ARRAY[index]}
-    if [ $ZKID == $ZOOKEEPER_ID ]
+    if [ $ZKIP == $SERVER_IP ]
     then
         # if IP's are used instead of hostnames, every ZooKeeper host has to specify itself as follows
         ZKIP=0.0.0.0
+        SERVER_ID=ZKID
     fi
     ZOOKEEPER_CONFIG="$ZOOKEEPER_CONFIG"$'\n'"server.$ZKID=$ZKIP:2888:3888"
 done
+
+# create myID file:
+echo "$SERVER_ID" | tee $dataDir/myid
+
 # Finally, write config file:
 echo "$ZOOKEEPER_CONFIG" | tee conf/zoo.cfg
 
