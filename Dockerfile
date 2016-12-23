@@ -17,6 +17,8 @@ RUN \
 && rm $BIN_VERSION.tar.gz \
 && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
+RUN apt-get -qq -y install curl
+
 # default parameters for config file:
 ENV tickTime=2000
 ENV dataDir=/var/lib/zookeeper/
@@ -24,6 +26,7 @@ ENV dataLogDir=/var/log/zookeeper/
 ENV clientPort=2181
 ENV initLimit=5
 ENV syncLimit=2
+ENV maxClientCnxns=10
 
 # add startup script
 ADD entrypoint.sh entrypoint.sh
